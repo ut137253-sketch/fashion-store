@@ -1,10 +1,8 @@
 import React, { useState } from "react";
+import "./App.css";
 
-// ===============================
-// 2 PIECE IMAGES - 17 PICTURES
-// ===============================
-const twoPieceImages = import.meta.glob(
-  "./images/women/winter/w2pc *.jpeg",
+const allWomenImages = import.meta.glob(
+  "./images/women/winter/**/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}",
   {
     eager: true,
     query: "?url",
@@ -12,671 +10,635 @@ const twoPieceImages = import.meta.glob(
   }
 );
 
-// ===============================
-// 3 PIECE IMAGES - 7 PICTURES
-// ===============================
-const threePieceImages = import.meta.glob(
-  "./images/women/winter/2pc/3pc/w3pc *.jpeg",
-  {
-    eager: true,
-    query: "?url",
-    import: "default",
-  }
-);
+const twoPieceImages = Object.entries(allWomenImages)
+  .filter(([path]) => {
+    const p = path.toLowerCase();
 
-// ===============================
-// FANCY BRIDAL - 16 PICTURES
-// ===============================
-const fancyBridalImages = import.meta.glob(
-  "./images/women/winter/2pc/Fancy bridal/wbr 1 *.jpeg",
-  {
-    eager: true,
-    query: "?url",
-    import: "default",
-  }
-);
-
-function App() {
-  const twoPiece = Object.values(twoPieceImages);
-  const threePiece = Object.values(threePieceImages);
-  const fancyBridal = Object.values(fancyBridalImages);
-
-  const [cart, setCart] = useState([]);
-  const [showCart, setShowCart] = useState(false);
-
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [customerAddress, setCustomerAddress] = useState("");
-
-  // ===============================
-  // ADD TO CART
-  // ===============================
-  function addToCart(image, name) {
-    const product = {
-      id: Date.now() + Math.random(),
-      name: name,
-      image: image,
-    };
-
-    setCart(function (oldCart) {
-      return oldCart.concat(product);
-    });
-  }
-
-  // ===============================
-  // REMOVE FROM CART
-  // ===============================
-  function removeFromCart(index) {
-    setCart(function (oldCart) {
-      return oldCart.filter(function (item, itemIndex) {
-        return itemIndex !== index;
-      });
-    });
-  }
-
-  // ===============================
-  // WHATSAPP ORDER
-  // ===============================
-  function sendWhatsAppOrder() {
-    if (
-      customerName.trim() === "" ||
-      customerPhone.trim() === "" ||
-      customerAddress.trim() === ""
-    ) {
-      alert("Please fill all customer details.");
-      return;
-    }
-
-    if (cart.length === 0) {
-      alert("Please add a product to cart first.");
-      return;
-    }
-
-    // Adeel Akram WhatsApp Number
-    const whatsappNumber = "923075842566";
-
-    const productNames = cart
-      .map(function (item) {
-        return item.name;
-      })
-      .join(", ");
-
-    const message =
-      "NEW ORDER - FASHION STORE\n\n" +
-      "Customer Name: " +
-      customerName +
-      "\n" +
-      "Customer Phone: " +
-      customerPhone +
-      "\n" +
-      "Delivery Address: " +
-      customerAddress +
-      "\n\n" +
-      "Products:\n" +
-      productNames +
-      "\n\n" +
-      "Shop: Adeel Akram\n" +
-      "Shop No. 78, First Floor, Rabia Centre\n" +
-      "Near Rabia Masjid, Sitara Lal Plaza\n" +
-      "Factory Area, Faisalabad";
-
-    const whatsappUrl =
-      "https://wa.me/" +
-      whatsappNumber +
-      "?text=" +
-      encodeURIComponent(message);
-
-    window.open(whatsappUrl, "_blank");
-  }
-
-  // ===============================
-  // PRODUCT CARD
-  // ===============================
-  function ProductCard(props) {
     return (
-      <div
-        style={{
-          backgroundColor: "#ffffff",
-          borderRadius: "14px",
-          overflow: "hidden",
-          boxShadow: "0 5px 20px rgba(0,0,0,0.08)",
-        }}
-      >
-        <img
-          src={props.image}
-          alt={props.title}
-          style={{
-            width: "100%",
-            height: "320px",
-            objectFit: "cover",
-            display: "block",
-          }}
-        />
-
-        <div
-          style={{
-            padding: "18px",
-            textAlign: "center",
-          }}
-        >
-          <h3
-            style={{
-              margin: "5px 0 8px",
-              fontSize: "20px",
-            }}
-          >
-            {props.title}
-          </h3>
-
-          <p
-            style={{
-              margin: "0 0 16px",
-              color: "#777",
-            }}
-          >
-            {props.subtitle}
-          </p>
-
-          <button
-            onClick={function () {
-              addToCart(props.image, props.title);
-            }}
-            style={{
-              width: "100%",
-              padding: "12px",
-              backgroundColor: "#151515",
-              color: "white",
-              border: "none",
-              borderRadius: "7px",
-              cursor: "pointer",
-              fontSize: "15px",
-              fontWeight: "bold",
-            }}
-          >
-            Add to Cart
-          </button>
-        </div>
-      </div>
+      (p.includes("/2pc/") && !p.includes("/3pc/") && !p.includes("fancy bridal")) ||
+      p.includes("/winter/w2pc")
     );
-  }
+  })
+  .map(([, image]) => image);
 
+const threePieceImages = Object.entries(allWomenImages)
+  .filter(([path]) => path.toLowerCase().includes("/3pc/"))
+  .map(([, image]) => image);
+
+const fancyBridalImages = Object.entries(allWomenImages)
+  .filter(([path]) => path.toLowerCase().includes("fancy bridal"))
+  .map(([, image]) => image);
+
+const facilityImages = Object.entries(allWomenImages)
+  .filter(([path]) => path.toLowerCase().includes("/faculity/"))
+  .slice(0, 3)
+  .map(([path, image], index) => {
+    const file = path.split("/").pop()?.toLowerCase() || "";
+
+    let title = "Our Craftsmanship";
+
+    if (file.includes("computerized")) {
+      title = "Computerized Embroidery Unit";
+    } else if (file.includes("factory")) {
+      title = "Factory Showroom & Display";
+    } else if (file.includes("premium")) {
+      title = "Premium Embroidered Outfits";
+    } else {
+      title = [
+        "Computerized Embroidery Unit",
+        "Factory Showroom & Display",
+        "Premium Embroidered Outfits",
+      ][index];
+    }
+
+    return {
+      image,
+      title,
+      text:
+        title === "Computerized Embroidery Unit"
+          ? "Our computerized embroidery unit combines modern technology with skilled craftsmanship to create fine and precise embroidery."
+          : title === "Factory Showroom & Display"
+          ? "Our factory showroom presents carefully crafted fashion designs with beautiful colors, fabrics and fine details."
+          : "Our premium embroidered outfits are created with attention to detail, quality fabrics and elegant finishing.",
+    };
+  });
+
+const whatsappNumber = "923075842566";
+
+function openWhatsApp(message) {
+  const url =
+    `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+
+  window.open(url, "_blank");
+}
+
+function productInquiry(name) {
+  openWhatsApp(
+    `Assalam o Alaikum
+
+I am interested in:
+${name}
+
+Please share the catalog, price and product details.`
+  );
+}
+
+function ProductCard({ image, title }) {
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        fontFamily: "Arial, sans-serif",
-        backgroundColor: "#f7f4f0",
-        color: "#222",
-      }}
-    >
-      {/* ================= HEADER ================= */}
+    <div className="product-card">
+      <div className="product-image-box">
+        <img src={image} alt={title} />
+      </div>
 
-      <header
-        style={{
-          backgroundColor: "#151515",
-          color: "white",
-          padding: "18px 6%",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "15px",
-          position: "sticky",
-          top: 0,
-          zIndex: 500,
-        }}
-      >
-        <h2 style={{ margin: 0 }}>
-          Fashion Store
-        </h2>
+      <div className="product-card-body">
+        <h3>{title}</h3>
+        <p>Premium Pakistani Fashion Collection</p>
 
-        <nav
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "5px",
-            flexWrap: "wrap",
-          }}
-        >
-          <button style={navButtonStyle}>Home</button>
-
-          <button style={navButtonStyle}>Men</button>
-
-          <button style={navButtonStyle}>Women</button>
-
-          <button style={navButtonStyle}>Contact</button>
-
-          <button
-            onClick={function () {
-              setShowCart(true);
-            }}
-            style={{
-              backgroundColor: "white",
-              color: "#111",
-              border: "none",
-              borderRadius: "25px",
-              padding: "10px 18px",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            Cart ({cart.length})
-          </button>
-        </nav>
-      </header>
-
-      {/* ================= HERO ================= */}
-
-      <section
-        style={{
-          minHeight: "430px",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          textAlign: "center",
-          padding: "50px 20px",
-          background:
-            "linear-gradient(135deg, #f1e5d8, #fffaf5)",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "800px",
-          }}
-        >
-          <p
-            style={{
-              fontSize: "14px",
-              letterSpacing: "3px",
-              textTransform: "uppercase",
-            }}
-          >
-            Welcome To
-          </p>
-
-          <h1
-            style={{
-              fontSize: "clamp(40px, 7vw, 70px)",
-              margin: "0 0 20px",
-            }}
-          >
-            Fashion Store
-          </h1>
-
-          <p
-            style={{
-              fontSize: "20px",
-              lineHeight: "1.6",
-              marginBottom: "30px",
-              color: "#555",
-            }}
-          >
-            Discover the latest fashion and stylish
-            clothes for every beautiful occasion.
-          </p>
-
-          <button
-            onClick={function () {
-              window.scrollTo({
-                top: 520,
-                behavior: "smooth",
-              });
-            }}
-            style={{
-              padding: "14px 32px",
-              fontSize: "16px",
-              backgroundColor: "#151515",
-              color: "white",
-              border: "none",
-              borderRadius: "30px",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            Shop Now
-          </button>
-        </div>
-      </section>
-
-      {/* ================= WOMEN COLLECTION ================= */}
-
-      <section
-        style={{
-          textAlign: "center",
-          padding: "55px 20px 20px",
-        }}
-      >
-        <p
-          style={{
-            letterSpacing: "2px",
-            textTransform: "uppercase",
-            fontSize: "13px",
-          }}
-        >
-          Our Collection
-        </p>
-
-        <h2
-          style={{
-            fontSize: "38px",
-            margin: "10px 0",
-          }}
-        >
-          Women Collection
-        </h2>
-
-        <p style={{ color: "#666" }}>
-          Explore our latest women's fashion collection
-        </p>
-      </section>
-
-      {/* ================= 2 PIECE ================= */}
-
-      <CollectionSection
-        title="2 Piece Winter Collection"
-        subtitle="Elegant styles for your winter wardrobe"
-      >
-        {twoPiece.map(function (image) {
-          return (
-            <ProductCard
-              key={image}
-              image={image}
-              title="2 Piece"
-              subtitle="Winter Collection"
-            />
-          );
-        })}
-      </CollectionSection>
-
-      {/* ================= 3 PIECE ================= */}
-
-      <CollectionSection
-        title="3 Piece Winter Collection"
-        subtitle="Beautiful 3 piece styles"
-      >
-        {threePiece.map(function (image) {
-          return (
-            <ProductCard
-              key={image}
-              image={image}
-              title="3 Piece"
-              subtitle="Winter Collection"
-            />
-          );
-        })}
-      </CollectionSection>
-
-      {/* ================= FANCY BRIDAL ================= */}
-
-      <CollectionSection
-        title="Fancy Bridal Collection"
-        subtitle="Elegant bridal fashion collection"
-      >
-        {fancyBridal.map(function (image) {
-          return (
-            <ProductCard
-              key={image}
-              image={image}
-              title="Fancy Bridal"
-              subtitle="Bridal Collection"
-            />
-          );
-        })}
-      </CollectionSection>
-
-      {/* ================= CART ================= */}
-
-      {showCart && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              width: "420px",
-              maxWidth: "92%",
-              height: "100%",
-              backgroundColor: "white",
-              padding: "25px",
-              boxSizing: "border-box",
-              overflowY: "auto",
-            }}
-          >
-            <button
-              onClick={function () {
-                setShowCart(false);
-              }}
-              style={{
-                float: "right",
-                cursor: "pointer",
-                padding: "7px 12px",
-              }}
-            >
-              X
-            </button>
-
-            <h2>Shopping Cart</h2>
-
-            {cart.length === 0 ? (
-              <p>Your cart is empty.</p>
-            ) : (
-              <div>
-                {/* CART ITEMS */}
-
-                {cart.map(function (item, index) {
-                  return (
-                    <div
-                      key={item.id}
-                      style={{
-                        display: "flex",
-                        gap: "12px",
-                        alignItems: "center",
-                        marginBottom: "15px",
-                        paddingBottom: "15px",
-                        borderBottom:
-                          "1px solid #eee",
-                      }}
-                    >
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        style={{
-                          width: "75px",
-                          height: "85px",
-                          objectFit: "cover",
-                          borderRadius: "6px",
-                        }}
-                      />
-
-                      <div
-                        style={{
-                          flex: 1,
-                        }}
-                      >
-                        <strong>{item.name}</strong>
-                      </div>
-
-                      <button
-                        onClick={function () {
-                          removeFromCart(index);
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  );
-                })}
-
-                {/* CUSTOMER DETAILS */}
-
-                <h2>Customer Details</h2>
-
-                <input
-                  type="text"
-                  placeholder="Customer Name"
-                  value={customerName}
-                  onChange={function (event) {
-                    setCustomerName(
-                      event.target.value
-                    );
-                  }}
-                  style={inputStyle}
-                />
-
-                <input
-                  type="tel"
-                  placeholder="Phone Number"
-                  value={customerPhone}
-                  onChange={function (event) {
-                    setCustomerPhone(
-                      event.target.value
-                    );
-                  }}
-                  style={inputStyle}
-                />
-
-                <textarea
-                  placeholder="Delivery Address"
-                  value={customerAddress}
-                  onChange={function (event) {
-                    setCustomerAddress(
-                      event.target.value
-                    );
-                  }}
-                  rows="4"
-                  style={inputStyle}
-                />
-
-                <button
-                  onClick={sendWhatsAppOrder}
-                  style={{
-                    width: "100%",
-                    padding: "15px",
-                    backgroundColor: "#25D366",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  Order on WhatsApp
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ================= FOOTER ================= */}
-
-      <footer
-        style={{
-          backgroundColor: "#151515",
-          color: "white",
-          textAlign: "center",
-          padding: "35px 20px",
-        }}
-      >
-        <h3>Fashion Store</h3>
-
-        <p>
-          Stylish fashion for every occasion
-        </p>
-
-        <p>
-          Shop No. 78, First Floor, Rabia Centre,
-          Near Rabia Masjid, Sitara Lal Plaza,
-          Factory Area, Faisalabad
-        </p>
-
-        <p>
-          WhatsApp: 0307 5842566
-        </p>
-
-        <p>
-          © 2026 Fashion Store. All Rights Reserved.
-        </p>
-      </footer>
+        <button onClick={() => productInquiry(title)}>
+          WhatsApp Inquiry
+        </button>
+      </div>
     </div>
   );
 }
 
-// ===============================
-// COLLECTION SECTION
-// ===============================
-
-function CollectionSection(props) {
+function CollectionSection({ id, title, description, images, productName }) {
   return (
-    <section
-      style={{
-        padding: "30px 6% 70px",
-      }}
-    >
-      <div
-        style={{
-          textAlign: "center",
-          marginBottom: "30px",
-        }}
-      >
-        <h2
-          style={{
-            fontSize: "30px",
-            marginBottom: "8px",
-          }}
-        >
-          {props.title}
-        </h2>
+    <section className="collection-section" id={id}>
+      <div className="section-title">
+        <span>OUR COLLECTION</span>
+        <h2>{title}</h2>
+        <div className="gold-line"></div>
+        <p>{description}</p>
+      </div>
 
-        <p style={{ color: "#777" }}>
-          {props.subtitle}
+      {images.length > 0 ? (
+        <div className="products-grid">
+          {images.map((image, index) => (
+            <ProductCard
+              key={`${productName}-${index}`}
+              image={image}
+              title={`${productName} ${index + 1}`}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="empty-message">
+          Collection images not found.
+        </div>
+      )}
+    </section>
+  );
+}
+
+function FacilitySection() {
+  return (
+    <section className="facility-section">
+      <div className="section-title">
+        <span>OUR FACILITY</span>
+        <h2>Craftsmanship & Quality</h2>
+        <div className="gold-line"></div>
+        <p>
+          Modern techniques, skilled workmanship and attention to detail
+          in every design.
         </p>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: "28px",
-          maxWidth: "1250px",
-          margin: "0 auto",
-        }}
-      >
-        {props.children}
+      {facilityImages.length > 0 && (
+        <div className="facility-grid">
+          {facilityImages.map((item, index) => (
+            <div className="facility-card" key={index}>
+              <img src={item.image} alt={item.title} />
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function CustomerInquiry() {
+  const [form, setForm] = useState({
+    fullName: "",
+    company: "",
+    country: "",
+    collection: "",
+    quantity: "",
+    phone: "",
+    email: "",
+    message: "",
+  });
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!form.fullName.trim()) {
+      alert("Please enter your Full Name.");
+      return;
+    }
+
+    if (!form.country) {
+      alert("Please select your Country.");
+      return;
+    }
+
+    if (!form.phone.trim()) {
+      alert("Please enter your WhatsApp / Phone number.");
+      return;
+    }
+
+    const message = `Assalam o Alaikum
+
+CUSTOMER INQUIRY
+
+Full Name: ${form.fullName}
+Company / Store: ${form.company || "Not provided"}
+Country: ${form.country}
+Collection Interest: ${form.collection || "Not provided"}
+Order Quantity: ${form.quantity || "Not provided"}
+WhatsApp / Phone: ${form.phone}
+Email: ${form.email || "Not provided"}
+
+Message:
+${form.message || "No additional message"}
+
+Please share catalog, pricing and sample information.`;
+
+    openWhatsApp(message);
+  };
+
+  return (
+    <section className="inquiry-section" id="inquiry">
+      <div className="section-title">
+        <span>GET IN TOUCH</span>
+        <h2>Customer Inquiry</h2>
+        <div className="gold-line"></div>
+        <p>
+          Please provide your details and requirements. Our team will
+          review your inquiry and respond within 24 hours.
+        </p>
+      </div>
+
+      <div className="inquiry-layout">
+        <div className="inquiry-info">
+          <h3>Catalog, Pricing & Sample Information</h3>
+
+          <p>
+            Tell us which collection you are interested in. You can
+            request product details, catalog information, pricing and
+            sample information.
+          </p>
+
+          <div className="info-item">
+            <strong>01</strong>
+            <div>
+              <h4>Choose Collection</h4>
+              <p>Lawn, Fancy, Cotton, 2 Piece, 3 Piece or Bridal.</p>
+            </div>
+          </div>
+
+          <div className="info-item">
+            <strong>02</strong>
+            <div>
+              <h4>Send Your Details</h4>
+              <p>Complete the inquiry form with your contact details.</p>
+            </div>
+          </div>
+
+          <div className="info-item">
+            <strong>03</strong>
+            <div>
+              <h4>Quick Response</h4>
+              <p>Our team will review your inquiry and respond.</p>
+            </div>
+          </div>
+        </div>
+
+        <form className="inquiry-form" onSubmit={handleSubmit}>
+          <div className="form-row">
+            <div className="form-group">
+              <label>
+                Full Name <span>*</span>
+              </label>
+              <input
+                name="fullName"
+                value={form.fullName}
+                onChange={handleChange}
+                placeholder="Enter your full name"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Company / Store</label>
+              <input
+                name="company"
+                value={form.company}
+                onChange={handleChange}
+                placeholder="Company or store name"
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>
+                Country <span>*</span>
+              </label>
+
+              <select
+                name="country"
+                value={form.country}
+                onChange={handleChange}
+              >
+                <option value="">Select Country</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="United Arab Emirates">
+                  United Arab Emirates
+                </option>
+                <option value="Canada">Canada</option>
+                <option value="United States">United States</option>
+                <option value="Australia">Australia</option>
+                <option value="Saudi Arabia">Saudi Arabia</option>
+                <option value="Qatar">Qatar</option>
+                <option value="Pakistan">Pakistan</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Collection Interest</label>
+
+              <select
+                name="collection"
+                value={form.collection}
+                onChange={handleChange}
+              >
+                <option value="">Select Collection</option>
+                <option value="Lawn">Lawn</option>
+                <option value="Fancy">Fancy</option>
+                <option value="Cotton">Cotton</option>
+                <option value="2 Piece">2 Piece</option>
+                <option value="3 Piece">3 Piece</option>
+                <option value="Fancy Bridal">Fancy Bridal</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>Order Quantity</label>
+              <input
+                name="quantity"
+                value={form.quantity}
+                onChange={handleChange}
+                placeholder="e.g. 50 pieces"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>
+                WhatsApp / Phone <span>*</span>
+              </label>
+
+              <input
+                name="phone"
+                type="tel"
+                value={form.phone}
+                onChange={handleChange}
+                placeholder="+92..."
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Email Address</label>
+
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="your@email.com"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Message</label>
+
+            <textarea
+              name="message"
+              value={form.message}
+              onChange={handleChange}
+              rows="5"
+              placeholder="Tell us about your requirements..."
+            ></textarea>
+          </div>
+
+          <button className="submit-button" type="submit">
+            Send Inquiry on WhatsApp
+          </button>
+        </form>
       </div>
     </section>
   );
 }
 
-// ===============================
-// STYLES
-// ===============================
+const faqData = [
+  {
+    question: "What is your minimum order quantity (MOQ)?",
+    answer:
+      "The MOQ can depend on the product, design, fabric and order requirements. Please contact us with your selected collection and we will provide the applicable MOQ.",
+  },
+  {
+    question: "Do you ship internationally? Which countries?",
+    answer:
+      "Yes, we welcome overseas export inquiries. Please tell us your destination country so our team can provide the relevant shipping information.",
+  },
+  {
+    question: "Can I request a sample before placing a bulk order?",
+    answer:
+      "Yes, sample options can be discussed depending on the selected product and collection. Contact us with the design you are interested in.",
+  },
+  {
+    question: "What are your payment terms?",
+    answer:
+      "Payment terms can vary according to the order, quantity and customer requirements. Our team will confirm the applicable terms before the order is finalized.",
+  },
+  {
+    question: "What is the production and delivery lead time?",
+    answer:
+      "Lead time depends on the design, quantity and destination. Once we receive your requirements, our team can provide an estimated production and delivery schedule.",
+  },
+  {
+    question: "Do you offer private label or OEM manufacturing?",
+    answer:
+      "Private label and OEM requirements can be discussed according to the product and order quantity. Please send your requirements through the inquiry form.",
+  },
+  {
+    question: "How do I get started?",
+    answer:
+      "Simply complete the Customer Inquiry form with your name, country, collection and contact details. You can also contact us directly on WhatsApp.",
+  },
+];
 
-const navButtonStyle = {
-  background: "transparent",
-  color: "white",
-  border: "none",
-  padding: "10px 12px",
-  cursor: "pointer",
-};
+function FAQSection() {
+  const [open, setOpen] = useState(null);
 
-const inputStyle = {
-  width: "100%",
-  padding: "13px",
-  marginBottom: "12px",
-  boxSizing: "border-box",
-  border: "1px solid #ddd",
-  borderRadius: "7px",
-  fontSize: "14px",
-};
+  return (
+    <section className="faq-section" id="faq">
+      <div className="section-title">
+        <span>FAQ</span>
+        <h2>Frequently Asked Questions</h2>
+        <div className="gold-line"></div>
+        <p>
+          Answers to common questions about our products and orders.
+        </p>
+      </div>
+
+      <div className="faq-container">
+        {faqData.map((item, index) => (
+          <div
+            className={`faq-item ${open === index ? "active" : ""}`}
+            key={index}
+          >
+            <button
+              type="button"
+              className="faq-question"
+              onClick={() => setOpen(open === index ? null : index)}
+            >
+              <span>
+                {index + 1}. {item.question}
+              </span>
+
+              <b>{open === index ? "−" : "+"}</b>
+            </button>
+
+            {open === index && (
+              <div className="faq-answer">
+                <p>{item.answer}</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function App() {
+  return (
+    <div className="app">
+      <header className="site-header">
+        <div className="header-inner">
+          <a href="#home" className="logo">
+            <strong>FASHION</strong>
+            <span>& DESIGN</span>
+          </a>
+
+          <nav>
+            <a href="#home">HOME</a>
+            <a href="#collections">COLLECTIONS</a>
+            <a href="#inquiry">INQUIRY</a>
+            <a href="#faq">FAQ</a>
+          </nav>
+
+          <a href="#inquiry" className="header-contact">
+            CONTACT US
+          </a>
+        </div>
+      </header>
+
+      <main>
+        <section className="hero" id="home">
+          <div className="hero-content">
+            <span>PAKISTANI FASHION & DESIGN</span>
+
+            <h1>
+              Elegant Designs.
+              <br />
+              Exceptional Craftsmanship.
+            </h1>
+
+            <p>
+              Discover premium Pakistani fashion collections with
+              beautiful fabrics, detailed embroidery and sophisticated
+              designs.
+            </p>
+
+            <div className="hero-buttons">
+              <a href="#collections" className="primary-btn">
+                Explore Collections
+              </a>
+
+              <a href="#inquiry" className="secondary-btn">
+                Make an Inquiry
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <section className="welcome-section" id="collections">
+          <div className="section-title">
+            <span>WELCOME</span>
+            <h2>Premium Fashion Collections</h2>
+            <div className="gold-line"></div>
+
+            <p>
+              From premium Pakistani fashion to overseas export, we focus
+              on quality, elegant designs and reliable customer service.
+            </p>
+          </div>
+
+          <div className="features">
+            <div className="feature">
+              <strong>01</strong>
+              <h3>Premium Quality</h3>
+              <p>Quality fabrics, embroidery and finishing.</p>
+            </div>
+
+            <div className="feature">
+              <strong>02</strong>
+              <h3>Beautiful Designs</h3>
+              <p>Elegant collections for modern customers.</p>
+            </div>
+
+            <div className="feature">
+              <strong>03</strong>
+              <h3>Overseas Export</h3>
+              <p>International and overseas inquiries welcome.</p>
+            </div>
+          </div>
+        </section>
+
+        <FacilitySection />
+
+        <CollectionSection
+          id="two-piece"
+          title="2 Piece Collection"
+          description="Explore our elegant 2 Piece winter collection."
+          images={twoPieceImages}
+          productName="2 Piece"
+        />
+
+        <CollectionSection
+          id="three-piece"
+          title="3 Piece Collection"
+          description="Discover our sophisticated 3 Piece collection."
+          images={threePieceImages}
+          productName="3 Piece"
+        />
+
+        <CollectionSection
+          id="fancy-bridal"
+          title="Fancy Bridal Collection"
+          description="A refined selection of elegant fancy bridal designs."
+          images={fancyBridalImages}
+          productName="Fancy Bridal"
+        />
+
+        <CustomerInquiry />
+
+        <FAQSection />
+
+        <section className="whatsapp-cta">
+          <span>DIRECT CONTACT</span>
+          <h2>Need Product Details?</h2>
+          <p>
+            Contact us directly for catalog, pricing, samples and
+            collection information.
+          </p>
+
+          <button
+            onClick={() =>
+              productInquiry("Fashion & Design Collection")
+            }
+          >
+            Chat on WhatsApp
+          </button>
+        </section>
+      </main>
+
+      <footer>
+        <div className="footer-inner">
+          <div>
+            <h3>FASHION & DESIGN</h3>
+            <p>
+              Premium Pakistani fashion collections with elegant
+              designs and quality craftsmanship.
+            </p>
+          </div>
+
+          <div>
+            <h4>Quick Links</h4>
+            <a href="#home">Home</a>
+            <a href="#collections">Collections</a>
+            <a href="#inquiry">Inquiry</a>
+            <a href="#faq">FAQ</a>
+          </div>
+
+          <div>
+            <h4>Contact</h4>
+            <p>WhatsApp: +92 307 5842566</p>
+          </div>
+        </div>
+
+        <div className="copyright">
+          © {new Date().getFullYear()} Fashion & Design. All Rights Reserved.
+        </div>
+      </footer>
+    </div>
+  );
+}
 
 export default App;
